@@ -6,4 +6,15 @@ SELECT
     MAX(followers) as max_followers, -- Saca el numero maximo que hay en la columna followers
     MIN(following) as min_following, -- Saca el numero minimo que hay en la columna following
     ROUND(AVG(followers)) as avg_followers -- ROUND redondea un dato decimal y AVG saca el promedio de una cantidad de datos
+FROM users;
+
+-- GROUP BY
+SELECT count(first_name) as conteo,
+       first_name,
+       followers
 FROM users
+WHERE followers = 4
+   or followers = 4999
+GROUP BY first_name,
+         followers
+ORDER BY followers desc;
