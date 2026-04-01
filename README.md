@@ -19,3 +19,12 @@ Para este curso, he configurado un entorno de desarrollo sobre **Fedora Linux**:
 
 ---
 *Comprometido con el aprendizaje continuo y conocer las buenas prácticas en el desarrollo de software.* 🚀
+---
+
+## 📚 Fuente de Aprendizaje
+
+Este repositorio contiene mis apuntes y ejercicios del curso:
+**[PostgreSQL: SQL, PL/SQL, Funciones y Triggers](https://www.udemy.com/course/sql-de-cero/)**
+Impartido por: **Fernando Herrera** en la plataforma **Udemy**.
+
+Agradezco a Fernando por la pedagogía que brinda y los recursos proporcionados que facilitan mi formación como Backend Developer.
