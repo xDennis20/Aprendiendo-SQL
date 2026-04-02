@@ -5,7 +5,6 @@ SELECT round(avg(followers)) as promedio_seguidores,
        country
 FROM users
 WHERE following >= 10
-GROUP BY
-    country
-HAVING avg(followers)>= 3000
+GROUP BY country
+HAVING avg(followers) >= 3000
 ORDER BY avg(followers) desc;
