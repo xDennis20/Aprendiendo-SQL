@@ -1,22 +1,22 @@
 -- 1. Cuantos Post hay - 1050
+
 SELECT count(*)
 FROM posts;
 
-
 -- 2. Cuantos Post publicados hay - 543
+
 SELECT count(*)
 FROM posts
 WHERE published is TRUE;
 
 -- 3. Cual es el Post mas reciente
 -- 544 - nisi commodo officia...2024-05-30 00:29:21.277
+
 SELECT *
 FROM posts
 WHERE created_at < now()
 ORDER BY created_at DESC
 limit 1;
-
-
 
 -- 4. Quiero los 10 usuarios con más post, cantidad de posts, id y nombre
 /*
@@ -31,6 +31,7 @@ limit 1;
 3	436	Mccoy Boone
 3	2034	Bonita Rowe
 */
+
 SELECT count(*) as total_post,
        a.created_by,
        b.name
@@ -40,7 +41,6 @@ GROUP BY a.created_by, b.name
 ORDER BY total_post DESC
 LIMIT 10;
 
-
 -- 5. Quiero los 5 post con más "Claps" sumando la columna "counter"
 /*
 692	sit excepteur ex ipsum magna fugiat laborum exercitation fugiat
@@ -49,10 +49,11 @@ LIMIT 10;
 504	ea est sunt magna consectetur tempor cupidatat
 502	amet exercitation tempor laborum fugiat aliquip dolore
 */
+
 SELECT sum(a.counter) as total_claps,
        b.body
 FROM claps as a
-INNER JOIN posts b on b.post_id = a.post_id
+         INNER JOIN posts b on b.post_id = a.post_id
 GROUP BY b.body
 ORDER BY total_claps DESC
 LIMIT 5;
@@ -65,13 +66,15 @@ LIMIT 5;
 6	Lela Cardenas
 6	Rose Owen
 */
+
 SELECT count(*) as total_claps,
        u.name
 FROM claps as a
-INNER JOIN users u on u.user_id = a.user_id
+         INNER JOIN users u on u.user_id = a.user_id
 GROUP BY u.name
 ORDER BY total_claps DESC
 limit 5;
+
 -- 7. Top 5 personas con votos acumulados (sumar counter)
 /*
 437	Rose Owen
@@ -80,6 +83,7 @@ limit 5;
 379	Jenna Roth
 364	Lillian Hodge
 */
+
 SELECT sum(a.counter) as total_claps_contados,
        u.name
 FROM claps as a
@@ -90,11 +94,11 @@ limit 5;
 
 -- 8. Cuantos usuarios NO tienen listas de favoritos creada
 -- 329
+
 SELECT count(*)
 FROM user_lists as a
-RIGHT JOIN users b ON  a.user_id = b.user_id
+         RIGHT JOIN users b ON a.user_id = b.user_id
 WHERE a.user_id is NULL;
-
 
 -- 9. Quiero el comentario con id #1
 -- Y en el mismo resultado, quiero sus respuestas (visibles e invisibles)
@@ -105,6 +109,7 @@ WHERE a.user_id is NULL;
 4649	51	1842	laborum mollit...
 4768	835	1447	nostrud nulla...
 */
+
 SELECT comment_id,
        post_id,
        user_id,
@@ -131,11 +136,35 @@ ORDER BY comment_id;
 "[{""user"" : 1797, ""comment"" : ""tempor mollit aliqua dolore cupidatat dolor tempor""}, {""user"" : 1842, ""comment"" : ""laborum mollit amet aliqua enim eiusmod ut""}, {""user"" : 1447, ""comment"" : ""nostrud nulla duis enim duis reprehenderit laboris voluptate cupidatat""}]"
 */
 
+WITH respuestas AS (
+    SELECT comment_id,
+           post_id,
+           user_id,
+           content
+    FROM comments
+    WHERE comment_id = 1
+    UNION
+    SELECT comment_id,
+           post_id,
+           user_id,
+           content
+    FROM comments
+    WHERE comment_parent_id = 1
+    ORDER BY comment_id
+)
+SELECT
+    json_agg(json_build_object('user',user_id,'comment',content) ORDER BY user_id)
+FROM respuestas;
 
 -- ** 11. Avanzado
 -- Listar todos los comentarios principales (no respuestas)
 -- Y crear una columna adicional "replies" con las respuestas en formato JSON
-
-
-
-
+SELECT a.*,
+       (
+           SELECT json_agg(json_build_object('user',user_id,'comment',content))
+           FROM comments b
+           WHERE b.comment_parent_id = a.comment_id
+           ) as replies
+FROM comments a
+WHERE comment_parent_id is null
+ORDER BY comment_id;
