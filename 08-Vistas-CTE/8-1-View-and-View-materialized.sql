@@ -27,3 +27,7 @@ SELECT * FROM comments_per_weeks;
 SELECT * FROM comments_per_weeks_mat;
 
 REFRESH MATERIALIZED VIEW comments_per_weeks_mat; -- Esto sirve para actualizar los datos de la vista materializada
+
+ALTER VIEW comments_per_weeks RENAME TO post_per_weeks; -- Cambiar de nombre una vista
+
+ALTER MATERIALIZED VIEW comments_per_weeks_mat RENAME TO post_per_weeks_mat; -- Cambiar de nombre una vista materializada
