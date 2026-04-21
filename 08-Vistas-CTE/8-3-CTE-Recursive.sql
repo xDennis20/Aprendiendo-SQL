@@ -9,3 +9,21 @@ WITH RECURSIVE countdown(val) as (
     SELECT val - 1 from countdown WHERE val > 1
 )
 SELECT * FROM countdown;
+
+
+WITH RECURSIVE increase(val) as (
+    -- inicializacion -> Es decir que con que valores va empezar la recursividad
+    -- Quiero que empieze con el valor de 1
+    SELECT 1 as val
+    UNION
+    -- Query recursivo o la iteracion recursiva
+    SELECT val + 1 from increase WHERE val < 10
+)
+SELECT * FROM increase;
+
+WITH RECURSIVE multiplication(base, multiplicador, result) as (
+    SELECT 5 as base , 1 as multiplicador, 5 as result
+    UNION
+    SELECT base, multiplicador + 1, base * (multiplicador + 1 )  FROM multiplication WHERE multiplicador < 10
+)
+SELECT * FROM multiplication;
