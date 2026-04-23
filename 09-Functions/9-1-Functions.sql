@@ -27,7 +27,7 @@ end;
 $$
     LANGUAGE plpgsql;
 
--- alternativa de la funcion max_raise
+-- alternativa de la funcion max_raise con condicionales y excepcion
 
 CREATE OR REPLACE FUNCTION max_raise_2(empl_id INT)
     RETURNS NUMERIC(8, 2)
