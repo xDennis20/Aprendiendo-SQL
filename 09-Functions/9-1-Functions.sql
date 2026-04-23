@@ -25,4 +25,4 @@ BEGIN
     RETURN total_increase;
 end;
 $$
-    LANGUAGE plpgsql;
+    LANGUAGE plpgsql ;
