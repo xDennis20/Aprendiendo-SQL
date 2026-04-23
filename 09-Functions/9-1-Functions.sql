@@ -8,7 +8,7 @@ end;
 $$
     LANGUAGE plpgsql;
 
--- Ejercicio 2
+-- Ejercicio 2 max_raise
 CREATE OR REPLACE FUNCTION max_raise(empl_id INT)
     RETURNS NUMERIC(8, 2)
 AS
@@ -25,4 +25,4 @@ BEGIN
     RETURN total_increase;
 end;
 $$
-    LANGUAGE plpgsql ;
+    LANGUAGE plpgsql;
