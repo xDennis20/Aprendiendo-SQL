@@ -84,3 +84,47 @@ EXCEPTION
 end;
 $$
     LANGUAGE plpgsql;
+
+/*
+ La Contratación en Cadena (Inserciones dependientes)
+Objetivo: Usar IDs recién creados para insertarlos en otras tablas dentro de la misma transacción.
+Tablas a usar: departments, employees
+
+El Requerimiento:
+La empresa está abriendo un nuevo departamento e inmediatamente está contratando al que será su primer empleado.
+
+Crea un procedimiento sp_crear_departamento_y_empleado(...). Va a recibir muchos parámetros: el nombre del departamento, el ID de la locación, y todos los datos básicos del nuevo empleado (nombre, apellido, email, fecha, trabajo, salario).
+ */
+
+CREATE OR REPLACE PROCEDURE sp_crear_departamento_y_empleado(department_name VARCHAR(30),
+                                                             locations_id INTEGER,
+                                                             nfirst_name VARCHAR(20),
+                                                             nlast_name VARCHAR(25),
+                                                             nemail VARCHAR(100),
+                                                             nphone_number VARCHAR(20),
+                                                             njob_id INTEGER,
+                                                             nmanager_id INTEGER,
+                                                             nsalary NUMERIC(8, 2))
+AS
+$$
+DECLARE
+    id_new_department INTEGER;
+BEGIN
+    -- Obtener id del nuevo departamento
+    INSERT INTO departments(department_name, location_id)
+    VALUES (sp_crear_departamento_y_empleado.department_name, locations_id)
+    RETURNING
+        department_id
+        INTO id_new_department;
+
+    -- Colocar el nuevo empleado al departamento nuevo
+    INSERT INTO employees(first_name, last_name, email, phone_number, hire_date, job_id, salary, manager_id,
+                          department_id)
+    VALUES (nfirst_name, nlast_name, nemail, nphone_number, current_date, njob_id, nsalary, nmanager_id,
+            id_new_department);
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'Error: %', SQLERRM;
+END;
+$$
+    LANGUAGE plpgsql
