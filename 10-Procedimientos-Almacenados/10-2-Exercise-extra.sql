@@ -17,7 +17,7 @@ CREATE OR REPLACE PROCEDURE sp_aumento_departamento(dpto_id INT, porcentaje NUME
 AS
 $$
 DECLARE
-    real_porcentaje NUMERIC;
+    real_porcentaje              NUMERIC;
     contador_salario_sobrepasado INT;
 BEGIN
     real_porcentaje := porcentaje / 100;
@@ -32,7 +32,8 @@ BEGIN
     INTO contador_salario_sobrepasado
     FROM employees
              INNER JOIN public.jobs j on j.job_id = employees.job_id
-    WHERE department_id = dpto_id AND salary > j.max_salary;
+    WHERE department_id = dpto_id
+      AND salary > j.max_salary;
 
     IF (contador_salario_sobrepasado = 0) THEN
         COMMIT;
@@ -40,5 +41,46 @@ BEGIN
         RAISE EXCEPTION 'Operación cancelada. El aumento supera el límite permitido para algunos puestos.';
     END IF;
 END;
+$$
+    LANGUAGE plpgsql;
+
+/*
+ Objetivo: Mantener la integridad de los datos (evitar empleados huérfanos de jefe).
+Tabla a usar: employees
+
+El Requerimiento:
+Un gerente (Manager) acaba de ser despedido. No podemos simplemente borrarlo, porque los empleados que estaban a su cargo se quedarían sin jefe (manager_id quedaría apuntando a la nada o daría error de Foreign Key).
+
+Crea un procedimiento llamado sp_despedir_manager(id_manager_despedido INT).
+ */
+
+CREATE OR REPLACE PROCEDURE sp_despedir_manager(id_manager_despedido INT)
+AS
+$$
+DECLARE
+    id_jefe_del_manager_despedido INTEGER;
+BEGIN
+
+    -- Obtener el id del jefe del manager despedido
+    SELECT manager_id
+    INTO id_jefe_del_manager_despedido
+    FROM employees
+    WHERE employee_id = id_manager_despedido;
+
+    -- Actualizar a todos los que tenian de jefe al manager que fue despedido al nuevo jefe
+    UPDATE employees
+    SET manager_id = id_jefe_del_manager_despedido
+    WHERE manager_id = id_manager_despedido;
+
+    -- ELiminar manager despedido
+    DELETE
+    FROM employees
+    WHERE employee_id = id_manager_despedido;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'Se canceló el despido por un error inesperado. Detalle del error: %', SQLERRM;
+
+end;
 $$
     LANGUAGE plpgsql;
