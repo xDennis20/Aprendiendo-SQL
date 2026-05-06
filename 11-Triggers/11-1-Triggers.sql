@@ -16,3 +16,26 @@ BEGIN
 END;
 $$
     LANGUAGE plpgsql;
+
+/*
+ Ejercicio 1:
+ */
+
+CREATE OR REPLACE FUNCTION registrar_cambio_salario()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF (OLD.salary IS DISTINCT FROM NEW.salary) THEN
+        INSERT INTO audit_salaries(employee_id, old_salary, new_salary, changed_on)
+        VALUES (OLD.employee_id, OLD.salary, NEW.salary, current_date);
+    END if;
+    RETURN NEW;
+END;
+$$
+    LANGUAGE plpgsql;
+
+CREATE TRIGGER vigilar_salarios
+    BEFORE UPDATE ON employees
+    FOR EACH ROW
+    EXECUTE PROCEDURE registrar_cambio_salario();
+
