@@ -127,4 +127,35 @@ EXCEPTION
         RAISE EXCEPTION 'Error: %', SQLERRM;
 END;
 $$
-    LANGUAGE plpgsql
+    LANGUAGE plpgsql;
+
+/*
+ Ejercicio de fernando
+ */
+CREATE OR REPLACE PROCEDURE user_login(user_name VARCHAR, user_password VARCHAR)
+AS
+$$
+DECLARE
+    was_found BOOLEAN;
+BEGIN
+    SELECT count(*)
+    INTO was_found
+    FROM "user"
+    WHERE name = user_name
+      AND password = crypt(user_password, password);
+
+    IF (was_found = FALSE) THEN
+        INSERT INTO session_failed(id, username, "when")
+        VALUES (1, user_name, current_timestamp);
+        COMMIT;
+        RAISE EXCEPTION 'Usuario y contraseña no son correctos';
+    end if;
+
+    UPDATE "user"
+    SET last_login = now()
+    WHERE name = user_name;
+    COMMIT;
+    RAISE NOTICE 'Usuario Encontrado %', was_found;
+END;
+$$
+    LANGUAGE plpgsql;
