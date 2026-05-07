@@ -39,3 +39,29 @@ CREATE TRIGGER vigilar_salarios
     FOR EACH ROW
     EXECUTE PROCEDURE registrar_cambio_salario();
 
+/*
+ Ejercicio 2:
+Objetivo: Usar un Trigger para limpiar datos basura antes de que toquen la base de datos.
+Tabla a vigilar: employees
+Recursos Humanos es un desastre escribiendo correos. A veces los ponen en mayúsculas, a veces se olvidan del dominio. Queremos que la base de datos arregle esto por ellos mágicamente.
+
+Crea una función y un trigger que se dispare justo antes de insertar o actualizar un empleado.
+ */
+
+CREATE OR REPLACE FUNCTION modificar_email_invalido()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    NEW.email := lower(NEW.email);
+    IF ( NEW.email NOT LIKE '%@sqltutorial.org' ) THEN
+        NEW.email := NEW.email || '@sqltutorial.org';
+    end if;
+    RETURN NEW;
+END;
+$$
+    LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER vigilar_email
+    BEFORE INSERT OR UPDATE ON employees
+    FOR EACH ROW
+    EXECUTE PROCEDURE modificar_email_invalido();
