@@ -114,3 +114,40 @@ CREATE OR REPLACE TRIGGER vigilar_salarios
     ON employees
     FOR EACH ROW
 EXECUTE PROCEDURE verificar_salario();
+
+/*
+ Objetivo: Evitar el abuso de registros basándonos en datos ya existentes.
+ El Requerimiento:
+Como la empresa paga un bono navideño por cada dependiente, algunos empleados están registrando hasta al perro.
+La junta dictaminó que un empleado puede tener un máximo de 5 dependientes registrados en total.
+
+ - Crea un trigger en la tabla dependents que se dispare antes de intentar agregar a un nuevo familiar.
+ */
+
+CREATE OR REPLACE FUNCTION verificar_dependents()
+    RETURNS TRIGGER AS
+$$
+DECLARE
+    count_dependets INTEGER;
+BEGIN
+    SELECT count(*)
+    INTO
+    count_dependets
+    FROM dependents
+    WHERE employee_id = NEW.employee_id;
+
+    IF (count_dependets = 5) THEN
+        RETURN NEW;
+    ELSE
+        RAISE EXCEPTION 'Sobrepasa el maximo de dependientes';
+    end if;
+END;
+$$
+    LANGUAGE plpgsql;
+
+
+ CREATE OR REPLACE TRIGGER vigilar_dependents
+    BEFORE INSERT
+    ON dependents
+    FOR EACH ROW
+EXECUTE PROCEDURE verificar_dependents();
